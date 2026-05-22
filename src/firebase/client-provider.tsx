@@ -8,13 +8,14 @@ import { getStorage, FirebaseStorage } from 'firebase/storage';
 import { firebaseConfig } from './config';
 import { FirebaseProvider } from './provider';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
-import { RefreshCw, Settings2, ShieldAlert } from 'lucide-react';
+import { RefreshCw, Settings2, ShieldAlert, Loader2 } from 'lucide-react';
 
 /**
  * FirebaseClientProvider
  * 
  * Handles Firebase initialization with robust error checking for both
- * production builds and runtime execution.
+ * production builds and runtime execution. Prevents white-screen crashes
+ * by ensuring context is ready before rendering children.
  */
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const [services, setServices] = useState<{
@@ -36,7 +37,7 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
       firebaseConfig[key as keyof typeof firebaseConfig] === ""
     );
 
-    // If config is missing in production, we must show an error to avoid a white screen (infinite loading)
+    // If config is missing in production, we must show an error to avoid a white screen
     if (missingKeys.length > 0) {
       if (typeof window !== 'undefined' && !window.location.hostname.includes('localhost')) {
         setError({
@@ -44,8 +45,9 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
           title: "Vault Config Missing",
           message: "The application environment variables are not detected. Please ensure NEXT_PUBLIC_FIREBASE_* keys are added to your Vercel/Netlify dashboard."
         });
+        return;
       }
-      return;
+      // In development/build, we might continue if mocked, but for production we stop here.
     }
 
     try {
@@ -69,7 +71,7 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  if (!isMounted) return <div className="min-h-screen bg-background" />;
+  if (!isMounted) return null;
 
   if (error) {
     return (
@@ -93,9 +95,14 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
     );
   }
 
-  // Fallback for missing services (e.g. during build)
+  // Prevent children from rendering (and potentially crashing) until services are ready
   if (!services) {
-    return <>{children}</>;
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background">
+        <Loader2 className="h-10 w-10 animate-spin text-primary opacity-20" />
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.4em]">Initializing ClassVault...</p>
+      </div>
+    );
   }
 
   return (
