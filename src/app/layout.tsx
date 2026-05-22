@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from '@/firebase';
+import { InstallGuide } from '@/components/InstallGuide';
 
 export const viewport: Viewport = {
   themeColor: '#1d4ed8',
@@ -14,8 +15,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'ClassVault | Modern Student Notes Platform',
-  description: 'ClassVault is a professional school notes platform where students can browse, search, and download study materials.',
+  title: 'ClassVault | Elite Learning Platform',
+  description: 'ClassVault is a professional student notes platform where students can browse, search, and download elite study materials.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -42,10 +43,12 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="theme-color" content="#1d4ed8" />
       </head>
       <body className="font-body antialiased min-h-full flex flex-col bg-background text-foreground overflow-x-hidden">
         <FirebaseClientProvider>
           {children}
+          <InstallGuide />
           <Toaster />
         </FirebaseClientProvider>
       </body>
