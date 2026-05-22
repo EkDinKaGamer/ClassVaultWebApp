@@ -2,8 +2,11 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
-  /* Capacitor packaging and free static hosting require a static export */
-  output: 'export',
+  /* 
+   * We only use 'export' when building for Android/Capacitor.
+   * For professional web hosting (Vercel/Netlify), standard output is better.
+   */
+  output: process.env.NEXT_EXPORT === 'true' ? 'export' : undefined,
   trailingSlash: true,
   images: {
     unoptimized: true,

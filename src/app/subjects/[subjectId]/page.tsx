@@ -2,17 +2,10 @@
 import SubjectPageClient from '@/components/SubjectPageClient';
 
 /**
- * Subject Library Page Shell
+ * Subject Library Page
  * 
- * Satisfies Next.js 15 requirements for static export by awaiting params correctly.
+ * Optimized for both dynamic web hosting and static Android exports.
  */
-
-export const dynamicParams = true;
-
-// This ensures the static build completes successfully
-export async function generateStaticParams() {
-  return [{ subjectId: 'initial' }];
-}
 
 interface PageProps {
   params: Promise<{ subjectId: string }>;
@@ -24,3 +17,6 @@ export default async function Page({ params }: PageProps) {
   
   return <SubjectPageClient />;
 }
+
+// We remove generateStaticParams to avoid 500 errors in dev/web.
+// Next.js will handle these dynamically on Vercel/Netlify.

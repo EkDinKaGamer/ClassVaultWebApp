@@ -2,12 +2,11 @@
 {
   "name": "ClassVault",
   "short_name": "ClassVault",
-  "description": "Elite Academic Access for Students",
+  "description": "Elite Academic Access & Professional Student Notes",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1d4ed8",
-  "orientation": "portrait",
   "icons": [
     {
       "src": "https://picsum.photos/seed/cv-icon/192/192",
@@ -16,9 +15,10 @@
       "purpose": "any maskable"
     },
     {
-      "src": "https://picsum.photos/seed/cv-icon/512/512",
+      "src": "https://picsum.photos/seed/cv-icon-large/512/512",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

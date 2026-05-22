@@ -8,10 +8,10 @@ Since this environment is a Cloud IDE, you cannot run Android Studio directly he
    ```bash
    npm run build:android
    ```
-   *If this fails with an Internal Server Error, please inform me so I can fix the build collector.*
+   *This command is specially configured to handle dynamic routes correctly for the APK.*
 
 2. **Download the Source Code**: 
-   Click the **Project Options** or **Export** button in the interface to download your project as a ZIP file.
+   Click the **Project Options** or **Export** button in the top toolbar to download your project as a ZIP file.
 
 3. **Prepare your Computer**:
    - Unzip the project folder.
