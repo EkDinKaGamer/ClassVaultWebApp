@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, ReactNode } from 'react';
@@ -35,11 +36,15 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
       firebaseConfig[key as keyof typeof firebaseConfig] === ""
     );
 
-    // During 'next build', env vars might be empty. We don't want to crash the pre-render.
+    // If config is missing in production, we must show an error to avoid a white screen (infinite loading)
     if (missingKeys.length > 0) {
-      console.warn("Firebase configuration is incomplete. This is expected during static build analysis.");
-      // We don't set a hard error here to allow pre-rendering to continue if possible
-      // but we ensure services stay null so the provider doesn't try to use invalid config.
+      if (typeof window !== 'undefined' && !window.location.hostname.includes('localhost')) {
+        setError({
+          type: 'config',
+          title: "Vault Config Missing",
+          message: "The application environment variables are not detected. Please ensure NEXT_PUBLIC_FIREBASE_* keys are added to your Vercel/Netlify dashboard."
+        });
+      }
       return;
     }
 
@@ -56,19 +61,15 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
       setServices({ app, db, storage });
     } catch (err: any) {
       console.error('Firebase Initialization Error:', err);
-      // Only set UI error if we are on the client and not in a build environment
-      if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
-        setError({
-          type: 'connection',
-          title: "Vault Connection Error",
-          message: "We couldn't reach the secure resource vault. Please check your network connection."
-        });
-      }
+      setError({
+        type: 'connection',
+        title: "Vault Connection Error",
+        message: "We couldn't reach the secure resource vault. Please check your network connection."
+      });
     }
   }, []);
 
-  // During SSR/Static collection, we return a simple loading state or the children 
-  if (!isMounted) return <>{children}</>;
+  if (!isMounted) return <div className="min-h-screen bg-background" />;
 
   if (error) {
     return (
@@ -92,8 +93,7 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
     );
   }
 
-  // If services aren't ready (e.g. during build or initial load), we show the children
-  // wrapped in a null provider or a loading state. For static export, we prefer children.
+  // Fallback for missing services (e.g. during build)
   if (!services) {
     return <>{children}</>;
   }

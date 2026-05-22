@@ -60,7 +60,6 @@ export function FirebaseProvider({
       if (snap.exists()) {
         setAppCodes(snap.data() as any);
       } else {
-        // Fallback to defaults if not set in Firestore
         setAppCodes({ adminCode: '234567', premiumCode: '345678' });
       }
     } catch (e) {
@@ -70,9 +69,11 @@ export function FirebaseProvider({
   };
 
   useEffect(() => {
-    const savedRole = localStorage.getItem('cv_role') as Role;
-    if (savedRole) {
-      setRoleState(savedRole);
+    if (typeof window !== 'undefined') {
+      const savedRole = localStorage.getItem('cv_role') as Role;
+      if (savedRole) {
+        setRoleState(savedRole);
+      }
     }
     setIsLoadingRole(false);
     fetchAppCodes();
@@ -80,10 +81,12 @@ export function FirebaseProvider({
 
   const setRole = (newRole: Role) => {
     setRoleState(newRole);
-    if (newRole) {
-      localStorage.setItem('cv_role', newRole);
-    } else {
-      localStorage.removeItem('cv_role');
+    if (typeof window !== 'undefined') {
+      if (newRole) {
+        localStorage.setItem('cv_role', newRole);
+      } else {
+        localStorage.removeItem('cv_role');
+      }
     }
   };
 
