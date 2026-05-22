@@ -6,6 +6,7 @@ import { ClassVaultHeader } from '@/components/ClassVaultHeader';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Book, GraduationCap, Calculator, Laptop, Globe, Rocket, Pencil, 
   Lightbulb, Atom, Variable, Code, Sparkles, School, FileText, 
@@ -72,7 +73,7 @@ export default function SubjectsPage() {
                         <ChevronRight className="h-6 w-6 text-primary opacity-20 group-hover:opacity-100 group-hover:translate-x-2 transition-all" />
                       </div>
                       <CardTitle className="text-2xl sm:text-3xl font-headline font-bold mb-4 tracking-tight leading-snug group-hover:text-primary transition-colors">{subject.name}</CardTitle>
-                      <CardDescription className="text-base sm:text-lg line-clamp-2 opacity-70 leading-relaxed">{subject.description}</CardDescription>
+                      <CardDescription className="text-base sm:text-lg line-clamp-2 opacity-70 Granny-relaxed">{subject.description}</CardDescription>
                     </CardHeader>
                   </Card>
                 </Link>
