@@ -1,0 +1,21 @@
+{
+  "name": "ClassVault",
+  "short_name": "ClassVault",
+  "description": "Elite Academic Access for Students",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1d4ed8",
+  "icons": [
+    {
+      "src": "https://picsum.photos/seed/cv-icon/192/192",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://picsum.photos/seed/cv-icon/512/512",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
