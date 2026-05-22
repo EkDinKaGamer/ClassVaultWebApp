@@ -3,10 +3,8 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   /* 
-   * We only use 'export' when building for Android/Capacitor.
-   * For professional web hosting (Vercel/Netlify), standard output is better.
+   * Standard dynamic output for professional web hosting (Vercel/Netlify).
    */
-  output: process.env.NEXT_EXPORT === 'true' ? 'export' : undefined,
   trailingSlash: true,
   images: {
     unoptimized: true,
