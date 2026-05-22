@@ -108,15 +108,15 @@
     },
     "/notes/{noteId}": {
       "schema": "#/entities/Note",
-      "description": "Study notes collection. Publicly readable by all students."
+      "description": "Study notes collection. Publicly readable and listable by all students."
     },
     "/subjects/{subjectId}": {
       "schema": "#/entities/Subject",
-      "description": "Subject categories. Publicly readable by all students."
+      "description": "Subject categories. Publicly readable and listable by all students."
     },
     "/announcements/{announcementId}": {
       "schema": "#/entities/Announcement",
-      "description": "System announcements. Publicly readable by all students."
+      "description": "System announcements. Publicly readable and listable by all students."
     },
     "/settings/{settingId}": {
       "schema": "#/entities/AppSettings",

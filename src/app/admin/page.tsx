@@ -92,16 +92,18 @@ export default function AdminDashboard() {
   const { toast } = useToast();
   const router = useRouter();
 
-  const [passcode, setPasscode] = useState('');
-  const [isVerifying, setIsVerifying] = useState(false);
-
-  const notesQuery = useMemo(() => db ? collection(db, 'notes') : null, [db]);
-  const subjectsQuery = useMemo(() => db ? collection(db, 'subjects') : null, [db]);
-  const announcementsQuery = useMemo(() => db ? collection(db, 'announcements') : null, [db]);
+  // Guard all administrative Firestore queries to prevent permission errors for students
+  const isAdmin = role === 'admin';
+  const notesQuery = useMemo(() => (db && isAdmin) ? collection(db, 'notes') : null, [db, isAdmin]);
+  const subjectsQuery = useMemo(() => (db && isAdmin) ? collection(db, 'subjects') : null, [db, isAdmin]);
+  const announcementsQuery = useMemo(() => (db && isAdmin) ? collection(db, 'announcements') : null, [db, isAdmin]);
 
   const { data: notes, loading: notesLoading } = useCollection(notesQuery);
   const { data: subjects, loading: subjectsLoading } = useCollection(subjectsQuery);
   const { data: announcements, loading: announcementsLoading } = useCollection(announcementsQuery);
+
+  const [passcode, setPasscode] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
 
   // Statistics memoization
   const totalViews = useMemo(() => notes?.reduce((acc, n) => acc + (n.viewCount || 0), 0) || 0, [notes]);
@@ -145,7 +147,7 @@ export default function AdminDashboard() {
   });
 
   useEffect(() => {
-    if (db && role === 'admin') {
+    if (db && isAdmin) {
       getDoc(doc(db, 'settings', 'homeConfig')).then((snap) => {
         if (snap.exists()) setHomeConfig(prev => ({ ...prev, ...snap.data() }));
       });
@@ -156,7 +158,7 @@ export default function AdminDashboard() {
         if (snap.exists()) setCodesForm(snap.data() as any);
       });
     }
-  }, [db, role]);
+  }, [db, isAdmin]);
 
   if (isLoadingRole) return (
     <div className="p-12 text-center flex flex-col items-center justify-center min-h-screen gap-6 animate-in fade-in">
