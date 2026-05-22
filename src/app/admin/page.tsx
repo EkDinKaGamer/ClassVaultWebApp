@@ -103,6 +103,11 @@ export default function AdminDashboard() {
   const { data: subjects, loading: subjectsLoading } = useCollection(subjectsQuery);
   const { data: announcements, loading: announcementsLoading } = useCollection(announcementsQuery);
 
+  // Statistics memoization - moved above early returns to comply with Rules of Hooks
+  const totalViews = useMemo(() => notes?.reduce((acc, n) => acc + (n.viewCount || 0), 0) || 0, [notes]);
+  const totalDownloads = useMemo(() => notes?.reduce((acc, n) => acc + (n.downloadCount || 0), 0) || 0, [notes]);
+  const mostPopularNote = useMemo(() => [...(notes || [])].sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))[0], [notes]);
+
   const [homeConfig, setHomeConfig] = useState({
     welcomeText: 'Master Your Subjects with Precision Notes',
     featuredMessage: 'Revolutionizing Academic Excellence',
@@ -324,10 +329,6 @@ export default function AdminDashboard() {
       });
   };
 
-  const totalViews = useMemo(() => notes?.reduce((acc, n) => acc + (n.viewCount || 0), 0) || 0, [notes]);
-  const totalDownloads = useMemo(() => notes?.reduce((acc, n) => acc + (n.downloadCount || 0), 0) || 0, [notes]);
-  const mostPopularNote = useMemo(() => [...(notes || [])].sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))[0], [notes]);
-
   return (
     <div className="flex flex-col min-h-screen bg-muted/10">
       <ClassVaultHeader />
@@ -411,7 +412,7 @@ export default function AdminDashboard() {
                   <Label className="font-bold text-xs uppercase tracking-widest ml-1">Visual Branding</Label>
                   <div className="space-y-6 bg-muted/20 p-6 sm:p-10 rounded-[2.5rem] border border-primary/5">
                     <div className="grid grid-cols-5 sm:grid-cols-10 gap-3">
-                      {BANNNER_COLORS.map(c => (
+                      {BANNER_COLORS.map(c => (
                         <button key={c.name} onClick={() => setNoteForm({...noteForm, colorBanner: c.class, bannerType: 'color'})} className={cn("h-10 w-10 sm:h-12 sm:w-12 rounded-xl border-4 transition-all shadow-md active:scale-90", c.class, noteForm.colorBanner === c.class ? "border-primary" : "border-background")} />
                       ))}
                     </div>
