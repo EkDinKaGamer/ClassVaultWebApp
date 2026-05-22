@@ -199,8 +199,14 @@ export function NoteCard({ note, isAdmin = false, onDelete }: { note: Note; isAd
                 <div className="flex items-center gap-3">
                   <div className="bg-primary/20 p-2 rounded-xl"><FileText className="h-4 w-4 text-primary" /></div>
                   <div className="max-w-[150px] sm:max-w-md">
-                    <h4 className="font-bold text-xs sm:text-sm truncate">{note.title}</h4>
-                    <p className="text-[10px] opacity-60 uppercase font-bold tracking-widest">{note.chapter}</p>
+                    <DialogHeader className="p-0 space-y-0 text-left">
+                      <DialogTitle className="font-bold text-xs sm:text-sm truncate text-white leading-normal">
+                        {note.title}
+                      </DialogTitle>
+                      <DialogDescription className="text-[10px] opacity-60 uppercase font-bold tracking-widest text-white/70 leading-normal">
+                        {note.chapter}
+                      </DialogDescription>
+                    </DialogHeader>
                   </div>
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2">
