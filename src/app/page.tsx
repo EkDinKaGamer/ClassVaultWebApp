@@ -31,11 +31,12 @@ export default function Home() {
   const configDocRef = useMemo(() => db ? doc(db, 'settings', 'homeConfig') : null, [db]);
   const { data: config, loading: configLoading } = useDoc(configDocRef);
   
-  const homeConfig = config || {
-    welcomeText: 'Master Your Subjects with Precision Notes',
-    featuredMessage: 'Revolutionizing Academic Excellence',
-    visibleSections: ['hero', 'updates', 'pulse', 'subjects', 'latest']
-  };
+  const homeConfig = useMemo(() => ({
+    welcomeText: config?.welcomeText || 'Master Your Subjects with Precision Notes',
+    homeDescription: config?.homeDescription || 'Access the full library of professional study materials.',
+    featuredMessage: config?.featuredMessage || 'Revolutionizing Academic Excellence',
+    visibleSections: config?.visibleSections || ['hero', 'updates', 'pulse', 'subjects', 'latest']
+  }), [config]);
 
   const [now, setNow] = useState<Timestamp | null>(null);
   
@@ -141,6 +142,9 @@ export default function Home() {
                     <h1 className="text-4xl sm:text-6xl md:text-7xl font-headline font-bold tracking-tight text-foreground leading-[1.1]">
                       {homeConfig.welcomeText}
                     </h1>
+                    <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed opacity-70 mt-4">
+                      {homeConfig.homeDescription}
+                    </p>
                   </>
                 )}
               </div>

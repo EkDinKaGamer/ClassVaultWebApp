@@ -20,7 +20,7 @@ import {
   Plus, Trash2, FileText, Bell, ShieldCheck, ArrowLeft, Loader2, Upload, 
   Book, GraduationCap, Calculator, Laptop, Globe, Rocket, Pencil, Lightbulb, Atom, Variable, Code, 
   Sparkles, School, Trophy, Target, Brain, Orbit, TestTube, FlaskConical,
-  Database, Crown, Pin, Settings, Save, TrendingUp, Download, Eye, Calendar
+  Database, Crown, Pin, Settings, Save, TrendingUp, Download, Eye, Calendar, Layout
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
@@ -103,16 +103,24 @@ export default function AdminDashboard() {
   const { data: subjects, loading: subjectsLoading } = useCollection(subjectsQuery);
   const { data: announcements, loading: announcementsLoading } = useCollection(announcementsQuery);
 
-  // Statistics memoization - moved above early returns to comply with Rules of Hooks
+  // Statistics memoization
   const totalViews = useMemo(() => notes?.reduce((acc, n) => acc + (n.viewCount || 0), 0) || 0, [notes]);
   const totalDownloads = useMemo(() => notes?.reduce((acc, n) => acc + (n.downloadCount || 0), 0) || 0, [notes]);
   const mostPopularNote = useMemo(() => [...(notes || [])].sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))[0], [notes]);
 
   const [homeConfig, setHomeConfig] = useState({
     welcomeText: 'Master Your Subjects with Precision Notes',
+    homeDescription: 'Access the full library of professional study materials.',
     featuredMessage: 'Revolutionizing Academic Excellence',
     visibleSections: ['hero', 'updates', 'pulse', 'subjects', 'latest']
   });
+
+  const [premiumConfig, setPremiumConfig] = useState({
+    premiumTitle: 'Elite Learning Starts Here',
+    premiumSubtitle: 'Unlock the full elite library of exam boosters and premium academic guides.',
+    premiumDescription: 'Unlock exclusive exam blueprints, high-yield summary sheets, and premium practice material curated for academic toppers.'
+  });
+
   const [codesForm, setCodesForm] = useState({ adminCode: '234567', premiumCode: '345678' });
   const [isSavingConfig, setIsSavingConfig] = useState(false);
 
@@ -139,7 +147,10 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (db && role === 'admin') {
       getDoc(doc(db, 'settings', 'homeConfig')).then((snap) => {
-        if (snap.exists()) setHomeConfig(snap.data() as any);
+        if (snap.exists()) setHomeConfig(prev => ({ ...prev, ...snap.data() }));
+      });
+      getDoc(doc(db, 'settings', 'premiumConfig')).then((snap) => {
+        if (snap.exists()) setPremiumConfig(prev => ({ ...prev, ...snap.data() }));
       });
       getDoc(doc(db, 'settings', 'appCodes')).then((snap) => {
         if (snap.exists()) setCodesForm(snap.data() as any);
@@ -211,9 +222,10 @@ export default function AdminDashboard() {
     if (!db) return;
     setIsSavingConfig(true);
     const homePromise = setDoc(doc(db, 'settings', 'homeConfig'), homeConfig);
+    const premiumPromise = setDoc(doc(db, 'settings', 'premiumConfig'), premiumConfig);
     const codesPromise = setDoc(doc(db, 'settings', 'appCodes'), codesForm);
 
-    Promise.all([homePromise, codesPromise])
+    Promise.all([homePromise, premiumPromise, codesPromise])
       .then(() => {
         toast({ title: "Vault Configuration Saved" });
         refreshAppCodes();
@@ -384,7 +396,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="notes" className="gap-2 rounded-2xl h-14 px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all shrink-0">Resources</TabsTrigger>
             <TabsTrigger value="subjects" className="gap-2 rounded-2xl h-14 px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all shrink-0">Directory</TabsTrigger>
             <TabsTrigger value="announcements" className="gap-2 rounded-2xl h-14 px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all shrink-0">Broadcasting</TabsTrigger>
-            <TabsTrigger value="config" className="gap-3 rounded-2xl h-14 px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all shrink-0"><Settings className="h-4 w-4" /> Vault Security</TabsTrigger>
+            <TabsTrigger value="config" className="gap-3 rounded-2xl h-14 px-8 font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all shrink-0"><Settings className="h-4 w-4" /> Vault Configuration</TabsTrigger>
           </TabsList>
 
           <TabsContent value="notes" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
@@ -505,41 +517,74 @@ export default function AdminDashboard() {
 
           <TabsContent value="config" className="space-y-12 animate-in fade-in duration-700">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-16">
-              <Card className="border-none shadow-xl rounded-[3rem] overflow-hidden bg-card">
-                <CardHeader className="p-8 sm:p-12 bg-muted/20 border-b">
-                  <CardTitle className="text-3xl font-bold tracking-tight">Vault Branding</CardTitle>
-                  <p className="text-muted-foreground font-medium mt-1">Configure the global entry experience.</p>
-                </CardHeader>
-                <CardContent className="p-8 sm:p-12 space-y-10">
-                  <div className="space-y-3">
-                    <Label className="font-bold text-xs uppercase tracking-widest ml-1">Main Headline</Label>
-                    <Input value={homeConfig.welcomeText} onChange={e => setHomeConfig({...homeConfig, welcomeText: e.target.value})} className="rounded-2xl h-14 text-base sm:text-lg border-2 shadow-inner bg-muted/20" />
-                  </div>
-                  <div className="space-y-3">
-                    <Label className="font-bold text-xs uppercase tracking-widest ml-1">Tagline Overlay</Label>
-                    <Input value={homeConfig.featuredMessage} onChange={e => setHomeConfig({...homeConfig, featuredMessage: e.target.value})} className="rounded-2xl h-14 text-base sm:text-lg border-2 shadow-inner bg-muted/20" />
-                  </div>
-                  <div className="space-y-4 pt-4">
-                    <Label className="font-bold text-xs uppercase tracking-widest ml-1 text-primary">Active Interface Modules</Label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {['hero', 'updates', 'pulse', 'subjects', 'latest'].map(section => (
-                        <div key={section} className="flex items-center justify-between bg-muted/30 p-5 rounded-[1.5rem] border border-primary/5 hover:bg-muted/50 transition-all">
-                          <span className="font-bold capitalize text-sm">{section}</span>
-                          <Switch 
-                            checked={homeConfig.visibleSections.includes(section)} 
-                            onCheckedChange={(checked) => {
-                              const newSections = checked 
-                                ? [...homeConfig.visibleSections, section]
-                                : homeConfig.visibleSections.filter(s => s !== section);
-                              setHomeConfig({...homeConfig, visibleSections: newSections});
-                            }} 
-                          />
-                        </div>
-                      ))}
+              <div className="space-y-12">
+                <Card className="border-none shadow-xl rounded-[3rem] overflow-hidden bg-card">
+                  <CardHeader className="p-8 sm:p-12 bg-muted/20 border-b">
+                    <div className="flex items-center gap-4">
+                      <Layout className="h-8 w-8 text-primary" />
+                      <CardTitle className="text-3xl font-bold tracking-tight">Home Tab Content</CardTitle>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                    <p className="text-muted-foreground font-medium mt-1">Manage titles and messages on the Home tab.</p>
+                  </CardHeader>
+                  <CardContent className="p-8 sm:p-12 space-y-8">
+                    <div className="space-y-3">
+                      <Label className="font-bold text-xs uppercase tracking-widest ml-1">Welcome Headline</Label>
+                      <Input value={homeConfig.welcomeText} onChange={e => setHomeConfig({...homeConfig, welcomeText: e.target.value})} className="rounded-2xl h-14 text-base border-2 shadow-inner bg-muted/20" />
+                    </div>
+                    <div className="space-y-3">
+                      <Label className="font-bold text-xs uppercase tracking-widest ml-1">Hero Sub-Headline</Label>
+                      <Textarea value={homeConfig.homeDescription} onChange={e => setHomeConfig({...homeConfig, homeDescription: e.target.value})} className="rounded-2xl h-24 text-base border-2 shadow-inner bg-muted/20" />
+                    </div>
+                    <div className="space-y-3">
+                      <Label className="font-bold text-xs uppercase tracking-widest ml-1">Featured Tagline</Label>
+                      <Input value={homeConfig.featuredMessage} onChange={e => setHomeConfig({...homeConfig, featuredMessage: e.target.value})} className="rounded-2xl h-14 text-base border-2 shadow-inner bg-muted/20" />
+                    </div>
+                    <div className="space-y-4 pt-4 border-t">
+                      <Label className="font-bold text-xs uppercase tracking-widest ml-1 text-primary">Active Modules</Label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {['hero', 'updates', 'pulse', 'subjects', 'latest'].map(section => (
+                          <div key={section} className="flex items-center justify-between bg-muted/30 p-5 rounded-[1.5rem] border border-primary/5">
+                            <span className="font-bold capitalize text-sm">{section}</span>
+                            <Switch 
+                              checked={homeConfig.visibleSections.includes(section)} 
+                              onCheckedChange={(checked) => {
+                                const newSections = checked 
+                                  ? [...homeConfig.visibleSections, section]
+                                  : homeConfig.visibleSections.filter(s => s !== section);
+                                setHomeConfig({...homeConfig, visibleSections: newSections});
+                              }} 
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-none shadow-xl rounded-[3rem] overflow-hidden bg-card">
+                  <CardHeader className="p-8 sm:p-12 bg-muted/20 border-b">
+                    <div className="flex items-center gap-4">
+                      <Crown className="h-8 w-8 text-amber-500" />
+                      <CardTitle className="text-3xl font-bold tracking-tight">Premium Tab Content</CardTitle>
+                    </div>
+                    <p className="text-muted-foreground font-medium mt-1">Manage titles and benefit descriptions for Elite students.</p>
+                  </CardHeader>
+                  <CardContent className="p-8 sm:p-12 space-y-8">
+                    <div className="space-y-3">
+                      <Label className="font-bold text-xs uppercase tracking-widest ml-1">Elite Heading</Label>
+                      <Input value={premiumConfig.premiumTitle} onChange={e => setPremiumConfig({...premiumConfig, premiumTitle: e.target.value})} className="rounded-2xl h-14 text-base border-2 shadow-inner bg-muted/20" />
+                    </div>
+                    <div className="space-y-3">
+                      <Label className="font-bold text-xs uppercase tracking-widest ml-1">Elite Sub-Heading</Label>
+                      <Input value={premiumConfig.premiumSubtitle} onChange={e => setPremiumConfig({...premiumConfig, premiumSubtitle: e.target.value})} className="rounded-2xl h-14 text-base border-2 shadow-inner bg-muted/20" />
+                    </div>
+                    <div className="space-y-3">
+                      <Label className="font-bold text-xs uppercase tracking-widest ml-1">Benefit Description</Label>
+                      <Textarea value={premiumConfig.premiumDescription} onChange={e => setPremiumConfig({...premiumConfig, premiumDescription: e.target.value})} className="rounded-2xl h-32 text-base border-2 shadow-inner bg-muted/20" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
 
               <Card className="border-none shadow-xl rounded-[3rem] overflow-hidden bg-card h-fit lg:sticky lg:top-24">
                 <CardHeader className="p-8 sm:p-12 bg-muted/20 border-b">
@@ -564,7 +609,7 @@ export default function AdminDashboard() {
             </div>
             <Button onClick={handleSaveConfig} className="rounded-[2rem] h-20 px-12 text-2xl font-bold w-full shadow-2xl shadow-primary/20 active:scale-95 transition-all" disabled={isSavingConfig}>
               {isSavingConfig ? <Loader2 className="h-8 w-8 animate-spin mr-3" /> : <Save className="h-8 w-8 mr-3" />}
-              Synchronize Security Configuration
+              Synchronize Vault Configuration
             </Button>
           </TabsContent>
 

@@ -75,8 +75,17 @@
           "type": "object",
           "properties": {
             "welcomeText": { "type": "string" },
+            "homeDescription": { "type": "string" },
             "featuredMessage": { "type": "string" },
             "visibleSections": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "premiumConfig": {
+          "type": "object",
+          "properties": {
+            "premiumTitle": { "type": "string" },
+            "premiumSubtitle": { "type": "string" },
+            "premiumDescription": { "type": "string" }
           }
         },
         "appCodes": {

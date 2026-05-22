@@ -10,9 +10,10 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useFirestore, useCollection, useRole } from '@/firebase';
-import { collection, query, where } from 'firebase/firestore';
+import { useFirestore, useCollection, useRole, useDoc } from '@/firebase';
+import { collection, query, where, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function PremiumPage() {
   const { role, setRole, appCodes } = useRole();
@@ -20,6 +21,16 @@ export default function PremiumPage() {
   const { toast } = useToast();
   const [passcode, setPasscode] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
+
+  // Content configuration
+  const configRef = useMemo(() => db ? doc(db, 'settings', 'premiumConfig') : null, [db]);
+  const { data: config, loading: configLoading } = useDoc(configRef);
+
+  const premiumConfig = useMemo(() => ({
+    premiumTitle: config?.premiumTitle || 'Elite Learning Starts Here',
+    premiumSubtitle: config?.premiumSubtitle || 'Unlock the full elite library of exam boosters and premium academic guides.',
+    premiumDescription: config?.premiumDescription || 'Unlock exclusive exam blueprints, high-yield summary sheets, and premium practice material curated for academic toppers.'
+  }), [config]);
 
   const premiumNotesQuery = useMemo(() => 
     db ? query(collection(db, 'notes'), where('isPremium', '==', true)) : null
@@ -62,12 +73,21 @@ export default function PremiumPage() {
             <Badge className="bg-amber-500/20 text-amber-500 border-amber-500/30 px-6 py-2 text-[10px] sm:text-xs font-bold tracking-[0.4em] uppercase rounded-full">
               ClassVault Elite
             </Badge>
-            <h1 className="text-4xl sm:text-6xl md:text-8xl font-headline font-bold tracking-tight leading-[1.05]">
-              Elite Learning <br /><span className="text-amber-500">Starts Here</span>
-            </h1>
-            <p className="text-lg sm:text-2xl text-slate-400 max-w-3xl mx-auto leading-relaxed opacity-80">
-              Unlock exclusive exam blueprints, high-yield summary sheets, and premium practice material curated for academic toppers.
-            </p>
+            {configLoading ? (
+              <div className="space-y-4">
+                <Skeleton className="h-20 w-full max-w-4xl mx-auto bg-white/10" />
+                <Skeleton className="h-10 w-full max-w-2xl mx-auto bg-white/10" />
+              </div>
+            ) : (
+              <>
+                <h1 className="text-4xl sm:text-6xl md:text-8xl font-headline font-bold tracking-tight leading-[1.05]">
+                  {premiumConfig.premiumTitle.split(' ').slice(0, -2).join(' ')} <br /><span className="text-amber-500">{premiumConfig.premiumTitle.split(' ').slice(-2).join(' ')}</span>
+                </h1>
+                <p className="text-lg sm:text-2xl text-slate-400 max-w-3xl mx-auto leading-relaxed opacity-80">
+                  {premiumConfig.premiumDescription}
+                </p>
+              </>
+            )}
             <div className="flex flex-wrap justify-center gap-6 sm:gap-10 pt-6">
               <div className="flex items-center gap-3 text-slate-300 text-sm sm:text-base font-medium">
                 <ShieldCheck className="h-6 w-6 text-amber-500" /> Secure Library
@@ -90,7 +110,9 @@ export default function PremiumPage() {
                   <Lock className="h-12 w-12" />
                 </div>
                 <h2 className="text-3xl sm:text-4xl font-headline font-bold">Unlock Elite Access</h2>
-                <p className="text-slate-950/70 text-base sm:text-lg max-w-sm mx-auto font-medium">Enter your 6-digit invitation code to join the elite student community.</p>
+                <p className="text-slate-950/70 text-base sm:text-lg max-w-sm mx-auto font-medium">
+                  {premiumConfig.premiumSubtitle}
+                </p>
               </div>
               <CardContent className="p-10 sm:p-16 space-y-12">
                 <div className="space-y-6 text-center">
