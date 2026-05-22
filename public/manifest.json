@@ -1,3 +1,4 @@
+
 {
   "name": "ClassVault",
   "short_name": "ClassVault",
@@ -15,7 +16,7 @@
       "purpose": "any maskable"
     },
     {
-      "src": "https://picsum.photos/seed/cv-icon-large/512/512",
+      "src": "https://picsum.photos/seed/cv-icon/512/512",
       "sizes": "512x512",
       "type": "image/png"
     }

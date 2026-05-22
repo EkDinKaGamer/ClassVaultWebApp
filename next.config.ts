@@ -2,7 +2,7 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
-  /* Capacitor packaging requires a static export */
+  /* Capacitor packaging and free static hosting require a static export */
   output: 'export',
   trailingSlash: true,
   images: {

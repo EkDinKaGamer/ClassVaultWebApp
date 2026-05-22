@@ -1,3 +1,4 @@
+
 import SubjectPageClient from '@/components/SubjectPageClient';
 
 /**
@@ -6,11 +7,10 @@ import SubjectPageClient from '@/components/SubjectPageClient';
  * Satisfies Next.js 15 requirements for static export by awaiting params correctly.
  */
 
-export const dynamicParams = false;
+export const dynamicParams = true;
 
+// This ensures the static build completes successfully
 export async function generateStaticParams() {
-  // Required for static export to know which paths to pre-render.
-  // We provide a fallback 'initial' path for the build collector.
   return [{ subjectId: 'initial' }];
 }
 
