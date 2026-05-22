@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -7,7 +6,7 @@ import {
   Book, GraduationCap, 
   Calculator, Laptop, Globe, Rocket, Pencil, Lightbulb, Atom, 
   Variable, Code, Sparkles, School, Trophy, Target, Brain, Orbit, TestTube, FlaskConical, Star, Crown, Pin,
-  ZoomIn, ZoomOut, Maximize2, Minimize2, AlertCircle
+  ZoomIn, ZoomOut, Maximize2, Minimize2, AlertCircle, X
 } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader } from './ui/card';
 import { Badge } from './ui/badge';
