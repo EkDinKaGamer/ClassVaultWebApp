@@ -10,7 +10,7 @@ export const dynamicParams = false;
 
 export async function generateStaticParams() {
   // Required for static export to know which paths to pre-render.
-  // We provide a fallback 'initial' path.
+  // We provide a fallback 'initial' path for the build collector.
   return [{ subjectId: 'initial' }];
 }
 
@@ -20,7 +20,7 @@ interface PageProps {
 
 export default async function Page({ params }: PageProps) {
   // In Next.js 15, params is a Promise that must be awaited
-  const { subjectId } = await params;
+  await params;
   
   return <SubjectPageClient />;
 }

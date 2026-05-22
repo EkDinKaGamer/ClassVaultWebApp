@@ -36,7 +36,7 @@ export default function Home() {
     visibleSections: ['hero', 'updates', 'pulse', 'subjects', 'latest']
   };
 
-  // Safe timestamp for queries
+  // Safe timestamp for queries to prevent hydration errors
   const [now, setNow] = useState<Timestamp | null>(null);
   
   useEffect(() => {
@@ -215,7 +215,7 @@ export default function Home() {
                 </Button>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-                {subjectsLoading ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-48 rounded-[2.5rem]" />) : 
+                {subjectsLoading ? Array.from({ length: 6 }).map((_, i) => <Skeleton className="h-48 rounded-[2.5rem]" />) : 
                 subjects?.length === 0 ? (
                   <div className="col-span-full py-12 text-center text-muted-foreground border border-dashed rounded-3xl">
                     No subjects defined yet.
@@ -243,7 +243,7 @@ export default function Home() {
                 <h2 className="text-4xl font-headline font-bold flex items-center gap-4"><TrendingUp className="h-10 w-10 text-primary" /> Latest Releases</h2>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                {notesLoading ? Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-80 rounded-[2rem]" />) : 
+                {notesLoading ? Array.from({ length: 4 }).map((_, i) => <Skeleton className="h-80 rounded-[2rem]" />) : 
                 latestNotes?.length === 0 ? (
                   <div className="col-span-full py-20 text-center text-muted-foreground border-2 border-dashed rounded-[2.5rem] italic">
                     No materials published yet.
