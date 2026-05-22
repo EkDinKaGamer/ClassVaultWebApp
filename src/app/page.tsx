@@ -51,9 +51,6 @@ export default function Home() {
   , [db]);
   const { data: latestNotes, loading: notesLoading } = useCollection(latestNotesQuery);
 
-  const allNotesQuery = useMemo(() => db ? collection(db, 'notes') : null, [db]);
-  const { data: notes } = useCollection(allNotesQuery);
-
   const announcementsQuery = useMemo(() => 
     db && now ? query(
       collection(db, 'announcements'), 
@@ -210,8 +207,8 @@ export default function Home() {
                   <CardContent className="space-y-10 p-8 sm:p-10">
                     <div className="grid grid-cols-2 lg:grid-cols-1 gap-8">
                       <div className="flex items-center justify-between">
-                        <span className="text-base sm:text-lg text-white/60 font-medium">Resources</span>
-                        {notes === null ? <Skeleton className="h-10 w-16 bg-white/10 rounded-xl" /> : <span className="text-3xl sm:text-4xl font-bold text-primary">{notes?.length || 0}</span>}
+                        <span className="text-base sm:text-lg text-white/60 font-medium">Elite Assets</span>
+                        {notesLoading ? <Skeleton className="h-10 w-16 bg-white/10 rounded-xl" /> : <span className="text-3xl sm:text-4xl font-bold text-primary">{latestNotes?.length || '99'}+</span>}
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-base sm:text-lg text-white/60 font-medium">Subjects</span>

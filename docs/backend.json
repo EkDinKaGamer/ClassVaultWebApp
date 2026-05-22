@@ -104,23 +104,23 @@
   "firestore": {
     "/users/{uid}": {
       "schema": "#/entities/User",
-      "description": "User profile data"
+      "description": "User profile data. Owners can read/write their own data."
     },
     "/notes/{noteId}": {
       "schema": "#/entities/Note",
-      "description": "Study notes collection"
+      "description": "Study notes collection. Publicly readable by all students."
     },
     "/subjects/{subjectId}": {
       "schema": "#/entities/Subject",
-      "description": "Subject categories"
+      "description": "Subject categories. Publicly readable by all students."
     },
     "/announcements/{announcementId}": {
       "schema": "#/entities/Announcement",
-      "description": "System announcements"
+      "description": "System announcements. Publicly readable by all students."
     },
     "/settings/{settingId}": {
       "schema": "#/entities/AppSettings",
-      "description": "Global app settings"
+      "description": "Global app settings. Home and Premium configs are public; appCodes is Admin only."
     }
   }
 }
