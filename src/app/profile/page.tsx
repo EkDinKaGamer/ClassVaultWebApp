@@ -14,6 +14,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { NoteCard } from '@/components/NoteCard';
 import { collection, query, where, documentId } from 'firebase/firestore';
+import { cn } from '@/lib/utils';
 
 function ProfileSkeleton() {
   return (
