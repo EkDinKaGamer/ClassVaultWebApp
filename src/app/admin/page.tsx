@@ -20,7 +20,7 @@ import {
   Plus, Trash2, FileText, Bell, ShieldCheck, ArrowLeft, Loader2, Upload, 
   Book, GraduationCap, Calculator, Laptop, Globe, Rocket, Pencil, Lightbulb, Atom, Variable, Code, 
   Sparkles, School, Trophy, Target, Brain, Orbit, TestTube, FlaskConical,
-  Database, Crown, Pin, Settings, Save, TrendingUp, Download, Eye, Calendar, Layout
+  Database, Crown, Pin, Settings, Save, TrendingUp, Download, Eye, Calendar, Layout, LogOut
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
@@ -92,7 +92,6 @@ export default function AdminDashboard() {
   const { toast } = useToast();
   const router = useRouter();
 
-  // Guard all administrative Firestore queries to prevent permission errors for students
   const isAdmin = role === 'admin';
   const notesQuery = useMemo(() => (db && isAdmin) ? collection(db, 'notes') : null, [db, isAdmin]);
   const subjectsQuery = useMemo(() => (db && isAdmin) ? collection(db, 'subjects') : null, [db, isAdmin]);
@@ -105,7 +104,6 @@ export default function AdminDashboard() {
   const [passcode, setPasscode] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
 
-  // Statistics memoization
   const totalViews = useMemo(() => notes?.reduce((acc, n) => acc + (n.viewCount || 0), 0) || 0, [notes]);
   const totalDownloads = useMemo(() => notes?.reduce((acc, n) => acc + (n.downloadCount || 0), 0) || 0, [notes]);
   const mostPopularNote = useMemo(() => [...(notes || [])].sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))[0], [notes]);
@@ -154,7 +152,7 @@ export default function AdminDashboard() {
       getDoc(doc(db, 'settings', 'premiumConfig')).then((snap) => {
         if (snap.exists()) setPremiumConfig(prev => ({ ...prev, ...snap.data() }));
       });
-      getDoc(doc(db, 'settings', 'appCodes')).then((snap) => {
+      getDoc(doc(db, 'settings', 'accessControl')).then((snap) => {
         if (snap.exists()) setCodesForm(snap.data() as any);
       });
     }
@@ -171,7 +169,10 @@ export default function AdminDashboard() {
   );
 
   const handleVerify = () => {
-    if (!appCodes) return;
+    if (!appCodes) {
+      toast({ variant: "destructive", title: "Security Error", description: "Could not fetch security codes. Please check your connection." });
+      return;
+    }
     setIsVerifying(true);
     setTimeout(() => {
       if (passcode === appCodes.adminCode) {
@@ -182,6 +183,12 @@ export default function AdminDashboard() {
       }
       setIsVerifying(false);
     }, 600);
+  };
+
+  const handleLogout = () => {
+    setRole(null);
+    router.push('/');
+    toast({ title: "Session Terminated", description: "You have been logged out of the vault." });
   };
 
   if (role !== 'admin') {
@@ -222,10 +229,19 @@ export default function AdminDashboard() {
 
   const handleSaveConfig = () => {
     if (!db) return;
+    
+    if (codesForm.adminCode.length < 6 || codesForm.premiumCode.length < 6) {
+      toast({ variant: "destructive", title: "Validation Error", description: "Security codes must be at least 6 digits long." });
+      return;
+    }
+
     setIsSavingConfig(true);
     const homePromise = setDoc(doc(db, 'settings', 'homeConfig'), homeConfig);
     const premiumPromise = setDoc(doc(db, 'settings', 'premiumConfig'), premiumConfig);
-    const codesPromise = setDoc(doc(db, 'settings', 'appCodes'), codesForm);
+    const codesPromise = setDoc(doc(db, 'settings', 'accessControl'), {
+      ...codesForm,
+      updatedAt: serverTimestamp()
+    });
 
     Promise.all([homePromise, premiumPromise, codesPromise])
       .then(() => {
@@ -353,12 +369,17 @@ export default function AdminDashboard() {
             <h1 className="text-4xl sm:text-6xl font-headline font-bold text-foreground leading-tight tracking-tight">Control Center</h1>
             <p className="text-muted-foreground text-lg sm:text-xl opacity-70">Manage elite content, system broadcasts and security.</p>
           </div>
-          <div className="bg-card p-5 sm:p-6 rounded-[2rem] shadow-sm border border-primary/5 flex items-center gap-5">
-            <div className="bg-primary/10 p-3 rounded-2xl text-primary"><Database className="h-6 w-6" /></div>
-            <div>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Vault Sync</p>
-              <p className="font-bold text-lg">Connected</p>
+          <div className="flex flex-wrap gap-4">
+            <div className="bg-card p-5 sm:p-6 rounded-[2rem] shadow-sm border border-primary/5 flex items-center gap-5">
+              <div className="bg-primary/10 p-3 rounded-2xl text-primary"><Database className="h-6 w-6" /></div>
+              <div>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Vault Sync</p>
+                <p className="font-bold text-lg">Connected</p>
+              </div>
             </div>
+            <Button variant="outline" className="h-auto px-8 rounded-[2rem] border-rose-200 text-rose-600 font-bold gap-3 hover:bg-rose-50" onClick={handleLogout}>
+              <LogOut className="h-5 w-5" /> Sign Out
+            </Button>
           </div>
         </div>
 

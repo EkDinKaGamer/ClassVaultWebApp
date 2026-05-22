@@ -88,11 +88,12 @@
             "premiumDescription": { "type": "string" }
           }
         },
-        "appCodes": {
+        "accessControl": {
           "type": "object",
           "properties": {
             "adminCode": { "type": "string" },
-            "premiumCode": { "type": "string" }
+            "premiumCode": { "type": "string" },
+            "updatedAt": { "type": "object" }
           }
         }
       }
@@ -120,7 +121,7 @@
     },
     "/settings/{settingId}": {
       "schema": "#/entities/AppSettings",
-      "description": "Global app settings. Home and Premium configs are public; appCodes is Admin only."
+      "description": "Global app settings. Home and Premium configs are public; accessControl is Admin only."
     }
   }
 }

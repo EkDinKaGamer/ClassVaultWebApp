@@ -55,8 +55,9 @@ export function FirebaseProvider({
   const [appCodes, setAppCodes] = useState<{ adminCode: string; premiumCode: string } | null>(null);
 
   const fetchAppCodes = async () => {
+    if (!db) return;
     try {
-      const snap = await getDoc(doc(db, 'settings', 'appCodes'));
+      const snap = await getDoc(doc(db, 'settings', 'accessControl'));
       if (snap.exists()) {
         setAppCodes(snap.data() as any);
       } else {
@@ -71,7 +72,15 @@ export function FirebaseProvider({
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedRole = localStorage.getItem('cv_role') as Role;
-      if (savedRole) {
+      const lastActive = localStorage.getItem('cv_last_active');
+      const now = Date.now();
+      const oneHour = 60 * 60 * 1000;
+
+      if (savedRole && lastActive && now - parseInt(lastActive) > oneHour) {
+        localStorage.removeItem('cv_role');
+        localStorage.removeItem('cv_last_active');
+        setRoleState(null);
+      } else if (savedRole) {
         setRoleState(savedRole);
       }
     }
@@ -79,13 +88,33 @@ export function FirebaseProvider({
     fetchAppCodes();
   }, [db]);
 
+  useEffect(() => {
+    if (role && typeof window !== 'undefined') {
+      localStorage.setItem('cv_last_active', Date.now().toString());
+      
+      const handleActivity = () => {
+        localStorage.setItem('cv_last_active', Date.now().toString());
+      };
+
+      window.addEventListener('mousedown', handleActivity);
+      window.addEventListener('keydown', handleActivity);
+      
+      return () => {
+        window.removeEventListener('mousedown', handleActivity);
+        window.removeEventListener('keydown', handleActivity);
+      };
+    }
+  }, [role]);
+
   const setRole = (newRole: Role) => {
     setRoleState(newRole);
     if (typeof window !== 'undefined') {
       if (newRole) {
         localStorage.setItem('cv_role', newRole);
+        localStorage.setItem('cv_last_active', Date.now().toString());
       } else {
         localStorage.removeItem('cv_role');
+        localStorage.removeItem('cv_last_active');
       }
     }
   };
