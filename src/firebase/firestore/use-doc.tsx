@@ -11,7 +11,15 @@ import {
 import { errorEmitter } from '../error-emitter';
 import { FirestorePermissionError } from '../errors';
 
-export function useDoc<T = DocumentData>(ref: DocumentReference<T> | null) {
+/**
+ * Hook to listen to a single Firestore document.
+ * @param ref - The document reference to listen to.
+ * @param options - Optional configuration (e.g., silent errors).
+ */
+export function useDoc<T = DocumentData>(
+  ref: DocumentReference<T> | null, 
+  options: { silent?: boolean } = {}
+) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -29,18 +37,25 @@ export function useDoc<T = DocumentData>(ref: DocumentReference<T> | null) {
         setLoading(false);
       },
       async (serverError: FirestoreError) => {
+        const isPermissionError = serverError.code === 'permission-denied';
+        
         const permissionError = new FirestorePermissionError({
           path: ref.path,
           operation: 'get',
         });
-        errorEmitter.emit('permission-error', permissionError);
+
+        // Only emit global error toast if not in silent mode
+        if (!options.silent) {
+          errorEmitter.emit('permission-error', permissionError);
+        }
+
         setError(permissionError);
         setLoading(false);
       }
     );
 
     return unsubscribe;
-  }, [ref]);
+  }, [ref, options.silent]);
 
   return { data, loading, error };
 }

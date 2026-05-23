@@ -11,7 +11,15 @@ import {
 import { errorEmitter } from '../error-emitter';
 import { FirestorePermissionError } from '../errors';
 
-export function useCollection<T = DocumentData>(query: Query<T> | null) {
+/**
+ * Hook to listen to a Firestore collection or query.
+ * @param query - The Firestore query to listen to.
+ * @param options - Optional configuration (e.g., silent errors).
+ */
+export function useCollection<T = DocumentData>(
+  query: Query<T> | null,
+  options: { silent?: boolean } = {}
+) {
   const [data, setData] = useState<T[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -37,14 +45,19 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
           path: (query as any)._query?.path?.toString() || 'unknown',
           operation: 'list',
         });
-        errorEmitter.emit('permission-error', permissionError);
+
+        // Only emit global error toast if not in silent mode
+        if (!options.silent) {
+          errorEmitter.emit('permission-error', permissionError);
+        }
+
         setError(permissionError);
         setLoading(false);
       }
     );
 
     return unsubscribe;
-  }, [query]);
+  }, [query, options.silent]);
 
   return { data, loading, error };
 }

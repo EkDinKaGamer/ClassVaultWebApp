@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useContext, ReactNode, useState, useEffect, useMemo } from 'react';
@@ -57,15 +56,21 @@ export function FirebaseProvider({
   const fetchAppCodes = async () => {
     if (!db) return;
     try {
+      // Fetch administrative codes silently. If it fails (expected for students),
+      // we don't broadcast a global permission error popup.
       const snap = await getDoc(doc(db, 'settings', 'accessControl'));
       if (snap.exists()) {
         setAppCodes(snap.data() as any);
       } else {
+        // Fallback defaults if doc doesn't exist yet
         setAppCodes({ adminCode: '234567', premiumCode: '345678' });
       }
     } catch (e) {
-      console.error("Failed to fetch app codes", e);
-      setAppCodes({ adminCode: '234567', premiumCode: '345678' });
+      // Handle permission errors silently for students
+      console.log("Note: Administrative codes are currently restricted.");
+      if (!appCodes) {
+        setAppCodes({ adminCode: '234567', premiumCode: '345678' });
+      }
     }
   };
 

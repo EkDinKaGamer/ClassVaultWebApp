@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "User": {
@@ -109,19 +108,27 @@
     },
     "/notes/{noteId}": {
       "schema": "#/entities/Note",
-      "description": "Study notes collection. Publicly readable and listable by all students."
+      "description": "Study notes collection. Publicly readable by all students."
     },
     "/subjects/{subjectId}": {
       "schema": "#/entities/Subject",
-      "description": "Subject categories. Publicly readable and listable by all students."
+      "description": "Subject categories. Publicly readable by all students."
     },
     "/announcements/{announcementId}": {
       "schema": "#/entities/Announcement",
-      "description": "System announcements. Publicly readable and listable by all students."
+      "description": "System announcements. Publicly readable by all students."
     },
-    "/settings/{settingId}": {
+    "/settings/homeConfig": {
       "schema": "#/entities/AppSettings",
-      "description": "Global app settings. Home and Premium configs are public; accessControl is Admin only."
+      "description": "Public home configuration. Readable by all users."
+    },
+    "/settings/premiumConfig": {
+      "schema": "#/entities/AppSettings",
+      "description": "Public premium configuration. Readable by all users."
+    },
+    "/settings/accessControl": {
+      "schema": "#/entities/AppSettings",
+      "description": "Administrative access codes. Admin only."
     }
   }
 }
