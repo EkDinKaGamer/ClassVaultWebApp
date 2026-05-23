@@ -20,7 +20,7 @@ import {
   Plus, Trash2, FileText, Bell, ShieldCheck, ArrowLeft, Loader2, Upload, 
   Book, GraduationCap, Calculator, Laptop, Globe, Rocket, Pencil, Lightbulb, Atom, Variable, Code, 
   Sparkles, School, Trophy, Target, Brain, Orbit, TestTube, FlaskConical,
-  Database, Crown, Pin, Settings, Save, TrendingUp, Download, Eye, Calendar, Layout, LogOut
+  Database, Crown, Pin, Settings, Save, TrendingUp, Download, Eye, Calendar, Layout, LogOut, Edit3, ChevronRight
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
@@ -85,6 +85,12 @@ const EDUCATIONAL_ICONS = [
   { name: 'TestTube', icon: TestTube },
 ];
 
+const ICON_MAP: Record<string, any> = {
+  Book, GraduationCap, FlaskConical, Calculator, Laptop, Globe, Rocket, Pencil, 
+  Lightbulb, Atom, Variable, Code, Sparkles, School, FileText, Trophy, Target, 
+  Brain, Orbit, TestTube
+};
+
 export default function AdminDashboard() {
   const { role, setRole, isLoadingRole, appCodes, refreshAppCodes } = useRole();
   const db = useFirestore();
@@ -104,6 +110,7 @@ export default function AdminDashboard() {
   const [passcode, setPasscode] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
 
+  // Moved hook calls to the top to follow the Rules of Hooks
   const totalViews = useMemo(() => notes?.reduce((acc, n) => acc + (n.viewCount || 0), 0) || 0, [notes]);
   const totalDownloads = useMemo(() => notes?.reduce((acc, n) => acc + (n.downloadCount || 0), 0) || 0, [notes]);
   const mostPopularNote = useMemo(() => [...(notes || [])].sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))[0], [notes]);
@@ -653,7 +660,7 @@ export default function AdminDashboard() {
                     <Input value={subjectForm.description} onChange={e => setSubjectForm({...subjectForm, description: e.target.value})} className="rounded-2xl h-14 text-lg border-2 shadow-inner bg-muted/20" placeholder="e.g. Core principles of mechanics..." />
                   </div>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <Label className="font-bold text-xs uppercase tracking-widest ml-1 text-primary">Category Color Theme</Label>
                   <div className="grid grid-cols-5 sm:grid-cols-10 gap-3 bg-muted/20 p-6 rounded-[2rem] border border-primary/5">
                     {BANNER_COLORS.map(c => (
@@ -661,11 +668,51 @@ export default function AdminDashboard() {
                     ))}
                   </div>
                 </div>
-                <Button onClick={handleSaveSubject} className="rounded-[1.5rem] h-16 sm:h-20 px-12 text-xl sm:text-2xl font-bold w-full shadow-2xl shadow-primary/20 active:scale-95 transition-all">
-                  {isEditingSubject ? 'Update Category' : 'Create Subject Category'}
-                </Button>
+                <div className="space-y-6">
+                   <Label className="font-bold text-xs uppercase tracking-widest ml-1 text-primary">Educational Icon</Label>
+                   <div className="grid grid-cols-5 sm:grid-cols-10 gap-3 bg-muted/20 p-6 rounded-[2rem] border border-primary/5">
+                    {EDUCATIONAL_ICONS.map(i => {
+                      const Icon = i.icon;
+                      return (
+                        <button key={i.name} onClick={() => setSubjectForm({...subjectForm, iconName: i.name, bannerType: 'icon'})} className={cn("h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-xl border-4 transition-all shadow-md active:scale-90", subjectForm.iconName === i.name ? "border-primary bg-primary text-white" : "border-background bg-card text-muted-foreground")}><Icon className="h-6 w-6" /></button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-6 pt-6">
+                  <Button onClick={handleSaveSubject} className="rounded-[1.5rem] h-16 sm:h-20 px-12 text-xl sm:text-2xl font-bold flex-1 shadow-2xl shadow-primary/20 active:scale-95 transition-all">
+                    {isEditingSubject ? 'Update Category' : 'Create Subject Category'}
+                  </Button>
+                  {isEditingSubject && <Button variant="ghost" onClick={() => setIsEditingSubject(null)} className="h-16 sm:h-20 px-8 rounded-[1.5rem] font-bold text-lg">Cancel Edit</Button>}
+                </div>
               </CardContent>
             </Card>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-10 mt-12">
+              {!subjectsLoading && subjects?.length === 0 && (
+                <div className="col-span-full py-32 text-center text-muted-foreground italic border-2 border-dashed rounded-[4rem] bg-muted/10 opacity-50">
+                  No subject categories defined yet.
+                </div>
+              )}
+              {subjects?.map(subject => {
+                const Icon = ICON_MAP[subject.iconName] || Book;
+                return (
+                  <div key={subject.id} className="bg-card rounded-[2.5rem] overflow-hidden border shadow-sm group relative hover:shadow-2xl transition-all duration-500">
+                    <div className={cn("h-32 flex items-center justify-center relative", subject.colorBanner || 'bg-primary/5')}>
+                      <Icon className="h-12 w-12 text-white drop-shadow-lg" />
+                      <div className="absolute inset-0 bg-slate-950/80 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-4 transition-all duration-500 backdrop-blur-[2px]">
+                        <Button size="sm" className="rounded-xl font-bold px-6 h-10 active:scale-90 transition-all" onClick={() => { setIsEditingSubject(subject.id); setSubjectForm(subject as any); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Edit</Button>
+                        <Button size="sm" variant="destructive" className="rounded-xl font-bold px-6 h-10 active:scale-90 transition-all" onClick={() => setDeleteConfirm({ open: true, coll: 'subjects', id: subject.id, title: subject.name })}>Delete</Button>
+                      </div>
+                    </div>
+                    <div className="p-6">
+                      <p className="font-bold text-xl line-clamp-1">{subject.name}</p>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mt-2 opacity-70 leading-relaxed">{subject.description}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </TabsContent>
 
           <TabsContent value="announcements" className="space-y-12 animate-in fade-in duration-700">
@@ -698,11 +745,37 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <Button onClick={handleSaveAnnouncement} className="rounded-[1.5rem] h-16 sm:h-20 px-12 text-xl sm:text-2xl font-bold w-full shadow-2xl shadow-primary/20 active:scale-95 transition-all">
-                  Broadcast to Vault
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-6 pt-6">
+                  <Button onClick={handleSaveAnnouncement} className="rounded-[1.5rem] h-16 sm:h-20 px-12 text-xl sm:text-2xl font-bold flex-1 shadow-2xl shadow-primary/20 active:scale-95 transition-all">
+                    {isEditingAnnouncement ? 'Update Broadcast' : 'Broadcast to Vault'}
+                  </Button>
+                  {isEditingAnnouncement && <Button variant="ghost" onClick={() => setIsEditingAnnouncement(null)} className="h-16 sm:h-20 px-8 rounded-[1.5rem] font-bold text-lg">Cancel Edit</Button>}
+                </div>
               </CardContent>
             </Card>
+
+            <div className="grid grid-cols-1 gap-6 mt-12 max-w-4xl mx-auto">
+              {!announcementsLoading && announcements?.length === 0 && (
+                <div className="py-24 text-center text-muted-foreground border-2 border-dashed rounded-[3rem] bg-muted/10 italic opacity-50">
+                  No system broadcasts issued yet.
+                </div>
+              )}
+              {announcements?.map(ann => (
+                <div key={ann.id} className="bg-card p-6 sm:p-8 rounded-[2rem] border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:shadow-lg transition-all">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      {ann.isPinned && <Pin className="h-4 w-4 text-amber-500 fill-amber-500" />}
+                      <h4 className="font-bold text-xl">{ann.title}</h4>
+                    </div>
+                    <p className="text-muted-foreground line-clamp-1 opacity-70">{ann.message}</p>
+                  </div>
+                  <div className="flex gap-3 shrink-0">
+                    <Button variant="outline" className="rounded-xl h-12 px-6 font-bold" onClick={() => { setIsEditingAnnouncement(ann.id); setAnnouncementForm({ ...ann, publishDate: ann.publishDate?.toDate?.()?.toISOString()?.slice(0, 16) || '' }); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Edit</Button>
+                    <Button variant="destructive" className="rounded-xl h-12 px-6 font-bold" onClick={() => setDeleteConfirm({ open: true, coll: 'announcements', id: ann.id, title: ann.title })}>Delete</Button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </TabsContent>
         </Tabs>
       </main>
