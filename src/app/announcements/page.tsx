@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { ClassVaultHeader } from '@/components/ClassVaultHeader';
-import { useFirestore, useCollection } from '@/firebase';
+import { useFirestore, useCollection, useRole } from '@/firebase';
 import { collection, query, orderBy, where, Timestamp } from 'firebase/firestore';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Bell, Calendar, Pin, AlertCircle, ChevronRight } from 'lucide-react';
@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 
 export default function AnnouncementsPage() {
   const db = useFirestore();
+  const { role } = useRole();
   const [now, setNow] = useState<Timestamp | null>(null);
 
   useEffect(() => {
@@ -21,14 +22,14 @@ export default function AnnouncementsPage() {
   }, []);
   
   const announcementsQuery = useMemo(() => 
-    db && now ? query(
+    (db && now && role) ? query(
       collection(db, 'announcements'), 
       where('publishDate', '<=', now),
       orderBy('publishDate', 'desc')
     ) : null
-  , [db, now]);
+  , [db, now, role]);
 
-  const { data: announcements, loading, error } = useCollection(announcementsQuery);
+  const { data: announcements, loading, error } = useCollection(announcementsQuery, { silent: true });
 
   useEffect(() => {
     if (announcements && announcements.length > 0) {
@@ -67,7 +68,7 @@ export default function AnnouncementsPage() {
                announcements.map((ann, i) => (
                 <div key={ann.id} className="flex flex-col md:flex-row gap-10 sm:gap-16 animate-in fade-in slide-in-from-bottom-10" style={{ animationDelay: `${i * 150}ms` }}>
                   <div className="hidden md:flex flex-col items-center pt-10">
-                    <div className={cn("z-10 rounded-full p-2.5 border-4 shadow-xl transition-all duration-700", ann.isPinned ? "border-amber-500 bg-amber-500/10" : "border-primary bg-card")}>
+                    <div className={cn("z-10 rounded-full p-2.5 border-4 shadow-xl transition-all duration-700", ann.isPinned ? "border-amber-500 bg-amber-50/10" : "border-primary bg-card")}>
                       <div className={cn("w-3 h-3 rounded-full", ann.isPinned ? "bg-amber-500 animate-pulse" : "bg-primary")} />
                     </div>
                   </div>
@@ -75,7 +76,7 @@ export default function AnnouncementsPage() {
                     <CardHeader className="p-8 sm:p-12">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
                         <div className="flex items-center gap-4">
-                          <Badge variant="outline" className={cn("px-5 py-1.5 rounded-xl uppercase font-bold text-[10px] tracking-[0.2em] border-2", ann.isPinned ? "border-amber-500/50 text-amber-600 dark:text-amber-400 bg-amber-500/5" : "border-primary/50 text-primary bg-primary/5")}>
+                          <Badge variant="outline" className={cn("px-5 py-1.5 rounded-xl uppercase font-bold text-[10px] tracking-[0.2em] border-2", ann.isPinned ? "border-amber-500/50 text-amber-600 dark:text-amber-400 bg-amber-50/5" : "border-primary/50 text-primary bg-primary/5")}>
                             {ann.isPinned ? 'Priority Update' : 'Vault Update'}
                           </Badge>
                           {ann.isPinned && <Pin className="h-5 w-5 text-amber-500 fill-amber-500 animate-pulse" />}

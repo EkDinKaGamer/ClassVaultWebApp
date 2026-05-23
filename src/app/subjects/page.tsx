@@ -28,10 +28,10 @@ export default function SubjectsPage() {
   const { role } = useRole();
   
   const subjectsQuery = useMemo(() => 
-    db ? collection(db, 'subjects') : null
-  , [db]);
+    (db && role) ? collection(db, 'subjects') : null
+  , [db, role]);
 
-  const { data: subjects } = useCollection(subjectsQuery);
+  const { data: subjects } = useCollection(subjectsQuery, { silent: true });
   const isAdmin = role === 'admin';
 
   return (

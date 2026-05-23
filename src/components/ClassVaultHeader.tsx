@@ -32,10 +32,10 @@ export function ClassVaultHeader() {
   const isPremium = role === 'premium-student';
 
   const announcementsQuery = useMemo(() => 
-    db ? query(collection(db, 'announcements'), orderBy('createdAt', 'desc')) : null
-  , [db]);
+    (db && role) ? query(collection(db, 'announcements'), orderBy('createdAt', 'desc')) : null
+  , [db, role]);
 
-  const { data: announcements } = useCollection(announcementsQuery);
+  const { data: announcements } = useCollection(announcementsQuery, { silent: true });
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('cv_theme');

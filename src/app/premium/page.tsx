@@ -22,9 +22,9 @@ export default function PremiumPage() {
   const [passcode, setPasscode] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
 
-  // Content configuration
-  const configRef = useMemo(() => db ? doc(db, 'settings', 'premiumConfig') : null, [db]);
-  const { data: config, loading: configLoading } = useDoc(configRef);
+  // Content configuration - Only run if role is set
+  const configRef = useMemo(() => (db && role) ? doc(db, 'settings', 'premiumConfig') : null, [db, role]);
+  const { data: config, loading: configLoading } = useDoc(configRef, { silent: true });
 
   const premiumConfig = useMemo(() => ({
     premiumTitle: config?.premiumTitle || 'Elite Learning Starts Here',
@@ -33,10 +33,10 @@ export default function PremiumPage() {
   }), [config]);
 
   const premiumNotesQuery = useMemo(() => 
-    db ? query(collection(db, 'notes'), where('isPremium', '==', true)) : null
-  , [db]);
+    (db && role) ? query(collection(db, 'notes'), where('isPremium', '==', true)) : null
+  , [db, role]);
 
-  const { data: notes } = useCollection(premiumNotesQuery);
+  const { data: notes } = useCollection(premiumNotesQuery, { silent: true });
 
   const isPremiumOrAdmin = role === 'premium-student' || role === 'admin';
 

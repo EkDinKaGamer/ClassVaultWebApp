@@ -27,9 +27,9 @@ export default function Home() {
 
   const isAdmin = role === 'admin';
 
-  // Memoized Firestore Queries
-  const configDocRef = useMemo(() => db ? doc(db, 'settings', 'homeConfig') : null, [db]);
-  const { data: config, loading: configLoading } = useDoc(configDocRef);
+  // Memoized Firestore Queries - Only run if role is set to avoid permission errors on selection screen
+  const configDocRef = useMemo(() => (db && role) ? doc(db, 'settings', 'homeConfig') : null, [db, role]);
+  const { data: config, loading: configLoading } = useDoc(configDocRef, { silent: true });
   
   const homeConfig = useMemo(() => ({
     welcomeText: config?.welcomeText || 'Master Your Subjects with Precision Notes',
@@ -47,22 +47,22 @@ export default function Home() {
   }, []);
 
   const latestNotesQuery = useMemo(() => 
-    db ? query(collection(db, 'notes'), orderBy('isPinned', 'desc'), orderBy('uploadDate', 'desc'), limit(4)) : null
-  , [db]);
-  const { data: latestNotes, loading: notesLoading } = useCollection(latestNotesQuery);
+    (db && role) ? query(collection(db, 'notes'), orderBy('isPinned', 'desc'), orderBy('uploadDate', 'desc'), limit(4)) : null
+  , [db, role]);
+  const { data: latestNotes, loading: notesLoading } = useCollection(latestNotesQuery, { silent: true });
 
   const announcementsQuery = useMemo(() => 
-    db && now ? query(
+    (db && now && role) ? query(
       collection(db, 'announcements'), 
       where('publishDate', '<=', now),
       orderBy('publishDate', 'desc'),
       limit(3)
     ) : null
-  , [db, now]);
-  const { data: announcements, loading: announcementsLoading, error: announcementsError } = useCollection(announcementsQuery);
+  , [db, now, role]);
+  const { data: announcements, loading: announcementsLoading, error: announcementsError } = useCollection(announcementsQuery, { silent: true });
 
-  const subjectsQuery = useMemo(() => db ? collection(db, 'subjects') : null, [db]);
-  const { data: subjects, loading: subjectsLoading } = useCollection(subjectsQuery);
+  const subjectsQuery = useMemo(() => (db && role) ? collection(db, 'subjects') : null, [db, role]);
+  const { data: subjects, loading: subjectsLoading } = useCollection(subjectsQuery, { silent: true });
 
   if (showSplash) {
     return (
@@ -208,7 +208,7 @@ export default function Home() {
                     <div className="grid grid-cols-2 lg:grid-cols-1 gap-8">
                       <div className="flex items-center justify-between">
                         <span className="text-base sm:text-lg text-white/60 font-medium">Elite Assets</span>
-                        {notesLoading ? <Skeleton className="h-10 w-16 bg-white/10 rounded-xl" /> : <span className="text-3xl sm:text-4xl font-bold text-primary">{latestNotes?.length || '99'}+</span>}
+                        {notesLoading ? <Skeleton className="h-10 w-16 bg-white/10 rounded-xl" /> : <span className="text-3xl sm:text-4xl font-bold text-primary">{latestNotes?.length || 0}+</span>}
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-base sm:text-lg text-white/60 font-medium">Subjects</span>
